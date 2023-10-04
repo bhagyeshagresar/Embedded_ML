@@ -19,6 +19,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "string.h"
+#include "mpu6050.h"
+
+#define BUFFER_SIZE 6
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -45,7 +48,7 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+MPU6050_t MPU6050;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,7 +72,9 @@ static void MX_I2C1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-   uint8_t buffer[12];
+
+   uint8_t buffer[BUFFER_SIZE];
+
 
   /* USER CODE END 1 */
 
@@ -96,16 +101,29 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
-
+  while (MPU6050_Init(&hi2c1) == 1);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-	strcpy((char*)buffer, "Hello!\r\n");
-	HAL_UART_Transmit(&huart2, buffer, strlen((char*)buffer), HAL_MAX_DELAY);
-	HAL_Delay(500);
+//	strcpy((char*)buffer, "Hello!\r\n");
+//	HAL_UART_Transmit(&huart2, buffer, strlen((char*)buffer), HAL_MAX_DELAY);
+//	HAL_Delay(500);
+	MPU6050_Read_All(&hi2c1, &MPU6050);
 
+	for(int i = 0; i < 3; i++){
+		buffer[2*i] = (uint8_t)(MPU6050.Accel_X_RAW & 0xFF); //LSB
+		buffer[(2*i) + 1] =  (uint8_t)((MPU6050.Accel_X_RAW >> 8)& 0xFF);//MSB
+
+	}
+
+
+
+	HAL_UART_Transmit(&huart2, buffer, 2, HAL_MAX_DELAY);
+
+
+	HAL_Delay (100);
 
 
     /* USER CODE BEGIN 3 */

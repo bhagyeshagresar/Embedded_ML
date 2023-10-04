@@ -38,6 +38,8 @@ int main(){
         //convert the char[] read from the nucleo in a string
         std::string inputValstr(inputData);
 
+        
+
         std::cout << inputData << std::endl;
 
         //convert string into double
